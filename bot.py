@@ -24,7 +24,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     welcome_text = (
         "👋 Welcome to *PoliTOGroupFinderBot*!\n\n"
-        "🎓 This bot helps students at *Politecnico di Torino* find their course group.\n\n"
+        # "🎓 This bot helps students at *Politecnico di Torino* find their course group.\n\n"
         "👉 How it works:\n"
         "1. From the 'NEWS' section of your course page, enter how many groups exist for your course.\n"
         "2. Provide the initial ranges for each group (format: `FAV-KHU`).\n"
