@@ -117,8 +117,9 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-def main():
-    # read token from environment variable
+import asyncio
+
+async def main():
     BOT_TOKEN = os.environ.get("BOT_TOKEN")
     if not BOT_TOKEN:
         raise ValueError("No BOT_TOKEN found. Please set it as an environment variable.")
@@ -140,9 +141,9 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(conv_handler)
 
-    # Run polling (only once)
-    app.run_polling(drop_pending_updates=True)
-
+    # Run polling (async)
+    await app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
+
