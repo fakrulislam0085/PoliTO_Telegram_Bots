@@ -1,5 +1,8 @@
+# bot.py
 import os
 import re
+import asyncio
+import nest_asyncio
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import (
     Application,
@@ -9,6 +12,9 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
+
+# Apply nest_asyncio early to allow nested event loops on Render
+nest_asyncio.apply()
 
 # States
 ASK_GROUPS, ASK_RULES, ASK_SURNAME = range(3)
@@ -24,7 +30,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     welcome_text = (
         "👋 Welcome to *PoliTOGroupFinderBot*!\n\n"
-        # "🎓 This bot helps students at *Politecnico di Torino* find their course group.\n\n"
         "👉 How it works:\n"
         "1. From the 'NEWS' section of your course page, enter how many groups exist for your course.\n"
         "2. Provide the initial ranges for each group (format: `FAV-KHU`).\n"
@@ -117,9 +122,10 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-import asyncio
-
-async def main():
+# ---------------------------
+# Async-run the bot safely
+# ---------------------------
+async def _run_bot():
     BOT_TOKEN = os.environ.get("BOT_TOKEN")
     if not BOT_TOKEN:
         raise ValueError("No BOT_TOKEN found. Please set it as an environment variable.")
@@ -141,9 +147,22 @@ async def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(conv_handler)
 
-    # Run polling (async)
-    await app.run_polling(drop_pending_updates=True)
+    # Initialize and start the application manually (avoids run_polling issues)
+    await app.initialize()
+    await app.start()
+
+    # Optional startup log to help debugging in Render logs
+    print("✅ PoliTOGroupFinderBot started (async mode). Waiting for updates...")
+
+    try:
+        # keep the process alive forever (until Render stops it)
+        await asyncio.Event().wait()
+    finally:
+        # graceful shutdown on termination
+        await app.stop()
+        await app.shutdown()
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
-
+    # run the async bot entrypoint
+    asyncio.run(_run_bot())
