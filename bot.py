@@ -124,7 +124,7 @@ def main():
         raise ValueError("No BOT_TOKEN found. Please set it as an environment variable.")
 
     app = Application.builder().token(BOT_TOKEN).build()
-
+    app.run_polling(drop_pending_updates=True)
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("findGroup", find_group_entry)],
         states={
